@@ -63,9 +63,11 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make('MountainCar-v0')
+    env = gym.make('CartPole-v0')
 
     print("Init gym env")
+    print env.observation_space
+    print env.action_space
 
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
