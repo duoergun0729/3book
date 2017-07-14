@@ -63,7 +63,7 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make('CartPole-v1')
+    env = gym.make('Pendulum-v0')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
     agent = DQNAgent(state_size, action_size)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     for e in range(EPISODES):
         state = env.reset()
-        #env.render()
+        env.render()
         state = np.reshape(state, [1, state_size])
         for time in range(500):
             # env.render()
