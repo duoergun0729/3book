@@ -8,7 +8,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
 
-EPISODES = 1
+EPISODES = 1000
 
 
 class DQNAgent:
@@ -63,18 +63,23 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make('CartPole-v0')
+    env = gym.make('Pendulum-v0')
+    #CartPole-v0
+    #env = gym.make('CartPole-v0')
 
-    print("Init gym env")
-    print env.observation_space
-    print env.action_space
+    print(env.action_space)
+
+    print(env.observation_space)
+
 
     state_size = env.observation_space.shape[0]
-    action_size = env.action_space.n
+    #action_size = env.action_space.n
+    action_size = env.action_space.shape[0]
 
-    print "state_size=%d,action_size=%d" %(state_size,action_size)
+    print "state_size={} action_size={}".format(state_size,action_size)
+
     agent = DQNAgent(state_size, action_size)
-    # agent.load("./save/cartpole-master.h5")
+
     done = False
     batch_size = 32
 
@@ -96,5 +101,4 @@ if __name__ == "__main__":
                 break
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
-        # if e % 10 == 0:
-        #     agent.save("./save/cartpole.h5")
+
