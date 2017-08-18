@@ -5,19 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn import metrics
 #import matplotlib.pyplot as plt
 import numpy as np
-#from sklearn import svm
-#from sklearn.feature_extraction.text import TfidfTransformer
-#import tensorflow as tf
-#import tflearn
-#from tflearn.layers.core import input_data, dropout, fully_connected
-#from tflearn.layers.conv import conv_1d, global_max_pool
-#from tflearn.layers.conv import conv_2d, max_pool_2d
-#from tflearn.layers.merge_ops import merge
-#from tflearn.layers.estimator import regression
-#from tflearn.data_utils import to_categorical, pad_sequences
-#from sklearn.neural_network import MLPClassifier
-#from tflearn.layers.normalization import local_response_normalization
-#from tensorflow.contrib import learn
+
 
 
 from keras.preprocessing import sequence
