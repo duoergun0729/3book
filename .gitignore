@@ -1,3 +1,7 @@
 doc/
 opt/
 data/
+code/*.pkl
+code/*.log
+code/*.png
+code/*.txt
