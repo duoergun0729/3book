@@ -5,17 +5,15 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten
 from keras.optimizers import Adam
 
-from rl.agents.dqn import DQNAgent
-from rl.policy import EpsGreedyQPolicy
-from rl.memory import SequentialMemory
+from rl.agents import SARSAAgent
+from rl.policy import EpsGreedyQPolicy()
 
 
 ENV_NAME = 'CartPole-v0'
 
-
 env = gym.make(ENV_NAME)
-np.random.seed(0)
-env.seed(0)
+np.random.seed(123)
+env.seed(123)
 nb_actions = env.action_space.n
 
 
@@ -27,14 +25,11 @@ model.add(Dense(24, activation='relu'))
 model.add(Dense(nb_actions, activation='linear'))
 
 
-memory = SequentialMemory(limit=2000, window_length=1)
 policy = EpsGreedyQPolicy()
-dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=10,
-               target_model_update=1e-2, policy=policy)
-
-dqn.compile(Adam(lr=1e-3), metrics=['mae'])
+sarsa = SARSAAgent(model=model, nb_actions=nb_actions, nb_steps_warmup=10, policy=policy)
+sarsa.compile(Adam(lr=1e-2), metrics=['mae'])
 
 
-dqn.fit(env, nb_steps=20000, visualize=False, verbose=2)
+sarsa.fit(env, nb_steps=20000, visualize=False, verbose=2)
 
-dqn.test(env, nb_episodes=5, visualize=True)
+sarsa.test(env, nb_episodes=5, visualize=True)
