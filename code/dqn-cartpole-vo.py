@@ -6,6 +6,7 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+from keras.utils.vis_utils import plot_model
 
 EPISODES = 1000
 
@@ -16,11 +17,14 @@ class DQNAgent:
         self.action_size = action_size
         self.memory = deque(maxlen=2000)
         self.gamma = 0.95    # discount rate
-        self.epsilon = 1.0  # exploration rate
+        #self.epsilon = 1.0  # exploration rate
+        self.epsilon = 0.4  # exploration rate
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.995
         self.learning_rate = 0.001
         self.model = self._build_model()
+        #可视化MLP结构
+        plot_model(self.model, to_file='dqn-cartpole-v0-mlp.png', show_shapes=False)
 
     def _build_model(self):
         # Neural Net for Deep-Q learning Model
@@ -39,6 +43,8 @@ class DQNAgent:
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
         act_values = self.model.predict(state)
+        #print "act_values:"
+        #print act_values
         return np.argmax(act_values[0])  # returns action
 
     def replay(self, batch_size):
@@ -51,8 +57,8 @@ class DQNAgent:
             target_f = self.model.predict(state)
             target_f[0][action] = target
             self.model.fit(state, target_f, epochs=1, verbose=0)
-        if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+        #if self.epsilon > self.epsilon_min:
+        #    self.epsilon *= self.epsilon_decay
 
     def load(self, name):
         self.model.load_weights(name)
@@ -62,13 +68,18 @@ class DQNAgent:
 
 
 if __name__ == "__main__":
-    env = gym.make('CartPole-v1')
+    env = gym.make('CartPole-v0')
     state_size = env.observation_space.shape[0]
     action_size = env.action_space.n
+
+    #print state_size
+    #print action_size
+
     agent = DQNAgent(state_size, action_size)
-    # agent.load("./save/cartpole-dqn.h5")
+
     done = False
     batch_size = 32
+    avg=0
 
     for e in range(EPISODES):
         state = env.reset()
@@ -84,8 +95,9 @@ if __name__ == "__main__":
             if done:
                 print("episode: {}/{}, score: {}, e: {:.2}"
                       .format(e, EPISODES, time, agent.epsilon))
+                avg+=time
                 break
         if len(agent.memory) > batch_size:
             agent.replay(batch_size)
-        # if e % 10 == 0:
-        #     agent.save("./save/cartpole-dqn.h5")
+
+    print "Avg score:{}".format(avg/1000)
