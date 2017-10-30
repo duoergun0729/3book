@@ -7,4 +7,3 @@ code/*.png
 code/*.h5f
 code/*.txt
 code/gym-malware/gym_malware/envs/utils/samples-old/
-code/gym-malware/gym_malware/.idea/
