@@ -1,6 +1,11 @@
+*pickle
+*.pyc
+*.h5
+*.cpython-36.pyc
 doc/
 opt/
 data/
+code/*/.idea/
 code/*.pkl
 code/*.log
 code/*.png
@@ -8,3 +13,4 @@ code/*.h5f
 code/*.txt
 code/gym-malware/gym_malware/envs/utils/samples-old/
 code/gym-malware/gym_malware/envs/utils/samples
+code/gym-malware/evaded/*
