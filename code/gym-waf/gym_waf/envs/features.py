@@ -9,15 +9,23 @@ class Features(object):
     def __init__(self):
         self.dim = 0
         self.name=""
+        self.dtype=np.float32
 
-    def str_len(self,str):
-        return len(str)
+    def byte_histogram(self,str):
+        #bytes=np.array(list(str))
+        bytes=[ord(ch) for ch in list(str)]
+        #print bytes
+
+        h = np.bincount(bytes, minlength=256)
+        return np.concatenate([
+            [h.sum()],  # total size of the byte stream
+            h.astype(self.dtype).flatten() / h.sum(),  # normalized the histogram
+        ])
 
     def extract(self,str):
 
         featurevectors = [
-            [self.str_len(str)],
-            [self.str_len(str)]
+            [self.byte_histogram(str)]
         ]
         return np.concatenate(featurevectors)
 
@@ -25,5 +33,6 @@ class Features(object):
 if __name__ == '__main__':
     f=Features()
     a=f.extract("alert()")
+    print a
     print a.shape
-    print a.shape[0]
+    #print a.shape[0]

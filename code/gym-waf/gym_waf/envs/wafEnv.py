@@ -45,13 +45,13 @@ class WafEnv_v0(gym.Env):
 
         r=0
         is_gameover=False
-        print "current sample:%s" % self.current_sample
+        #print "current sample:%s" % self.current_sample
 
         _action=ACTION_LOOKUP[action]
-        print "action is %s" % _action
+        #print "action is %s" % _action
 
         self.current_sample=self.xss_manipulatorer.modify(self.current_sample,_action)
-        print "change current sample to %s" % self.current_sample
+        #print "change current sample to %s" % self.current_sample
 
         if self.waf_checker.check_xss(self.current_sample):
             print "Match waf rule"
@@ -59,7 +59,7 @@ class WafEnv_v0(gym.Env):
             #给奖励
             r=10
             is_gameover=True
-            print "Good!!!!!!!"
+            print "Good!!!!!!!avoid waf:%s" % self.current_sample
 
         self.observation_space=self.features_extra.extract(self.current_sample)
 

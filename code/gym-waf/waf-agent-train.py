@@ -15,7 +15,7 @@ from rl.agents.sarsa import SarsaAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
-
+ENV_NAME = 'Waf-v0'
 
 def generate_dense_model(input_shape, layers, nb_actions):
     model = Sequential()
@@ -35,7 +35,7 @@ def generate_dense_model(input_shape, layers, nb_actions):
 
 
 def train_dqn_model(layers, rounds=10000):
-    ENV_NAME = 'Waf-v0'
+
     env = gym.make(ENV_NAME)
     env.seed(1)
     nb_actions = env.action_space.n
@@ -62,6 +62,9 @@ def train_dqn_model(layers, rounds=10000):
     # play the game. learn something!
     agent.fit(env, nb_steps=rounds, visualize=False, verbose=2)
 
+    print "#################Start Test%################"
+
+    agent.test(env, nb_episodes=100)
 
     return agent, model
 
@@ -69,5 +72,7 @@ def train_dqn_model(layers, rounds=10000):
 if __name__ == '__main__':
     agent1, model1= train_dqn_model([5, 2], rounds=1000)
     model1.save('waf-v0.h5', overwrite=True)
+
+
 
 
