@@ -25,6 +25,9 @@ class Xss_Manipulator(object):
     ACTION_TABLE = {
     'charTo16': 'charTo16',
     'charTo10': 'charTo10',
+    'charTo10Zero': 'charTo10Zero',
+    #'addComment': 'addComment'
+     'addTab': 'addTab'
     }
 
     def charTo16(self,str,seed=None):
@@ -60,7 +63,48 @@ class Xss_Manipulator(object):
 
         return str
 
+    def charTo10Zero(self,str,seed=None):
+        #print "charTo10"
+        matchObjs = re.findall(r'[a-qA-Q]', str, re.M | re.I)
+        if matchObjs:
+            #print "search --> matchObj.group() : ", matchObjs
+            modify_char=random.choice(matchObjs)
+            #字符转ascii值ord(modify_char
+            #modify_char_10=ord(modify_char)
+            modify_char_10="&#000000{};".format(ord(modify_char))
+            #print "modify_char %s to %s" % (modify_char,modify_char_10)
+            #替换
+            str=re.sub(modify_char, modify_char_10, str)
 
+        return str
+
+    def addComment(self,str,seed=None):
+        #print "charTo10"
+        matchObjs = re.findall(r'[a-qA-Q]', str, re.M | re.I)
+        if matchObjs:
+            #选择替换的字符
+            modify_char=random.choice(matchObjs)
+            #生成替换的内容
+            modify_char_comment="{}/*a{}*/".format(modify_char,modify_char)
+
+            #替换
+            str=re.sub(modify_char, modify_char_comment, str)
+
+        return str
+
+    def addTab(self,str,seed=None):
+        #print "charTo10"
+        matchObjs = re.findall(r'[a-qA-Q]', str, re.M | re.I)
+        if matchObjs:
+            #选择替换的字符
+            modify_char=random.choice(matchObjs)
+            #生成替换的内容
+            modify_char_comment="   {}".format(modify_char,modify_char)
+
+            #替换
+            str=re.sub(modify_char, modify_char_comment, str)
+
+        return str
 
     def modify(self,str, _action, seed=None):
 

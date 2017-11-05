@@ -53,9 +53,7 @@ class WafEnv_v0(gym.Env):
         self.current_sample=self.xss_manipulatorer.modify(self.current_sample,_action)
         #print "change current sample to %s" % self.current_sample
 
-        if self.waf_checker.check_xss(self.current_sample):
-            print "Match waf rule"
-        else:
+        if not self.waf_checker.check_xss(self.current_sample):
             #给奖励
             r=10
             is_gameover=True
