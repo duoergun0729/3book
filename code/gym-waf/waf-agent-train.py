@@ -51,7 +51,7 @@ def train_dqn_model(layers, rounds=10000):
 
     policy = EpsGreedyQPolicy()
 
-    memory = SequentialMemory(limit=32, ignore_episode_boundaries=False, window_length=window_length)
+    memory = SequentialMemory(limit=256, ignore_episode_boundaries=False, window_length=window_length)
 
     agent = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=16,
                      enable_double_dqn=True, enable_dueling_network=True, dueling_type='avg',
@@ -60,7 +60,8 @@ def train_dqn_model(layers, rounds=10000):
     agent.compile(RMSprop(lr=1e-3), metrics=['mae'])
 
     # play the game. learn something!
-    agent.fit(env, nb_steps=rounds, visualize=False, verbose=2)
+    #nb_max_episode_steps 一次学习周期中最大步数
+    agent.fit(env, nb_steps=rounds, nb_max_episode_steps=100,visualize=False, verbose=2)
 
     print "#################Start Test%################"
 

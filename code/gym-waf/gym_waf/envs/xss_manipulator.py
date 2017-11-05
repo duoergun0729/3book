@@ -21,13 +21,16 @@ class Xss_Manipulator(object):
     # 插入回车
     # 开头插入空格 比如： /**/
     # 大小写混淆
+    # 插入 \00 也会被浏览器忽略
 
     ACTION_TABLE = {
-    'charTo16': 'charTo16',
-    'charTo10': 'charTo10',
-    'charTo10Zero': 'charTo10Zero',
-    #'addComment': 'addComment'
-     'addTab': 'addTab'
+    #'charTo16': 'charTo16',
+    #'charTo10': 'charTo10',
+    #'charTo10Zero': 'charTo10Zero',
+    'addComment': 'addComment',
+    'addTab': 'addTab',
+    'addZero': 'addZero',
+    'addEnter': 'addEnter',
     }
 
     def charTo16(self,str,seed=None):
@@ -100,6 +103,35 @@ class Xss_Manipulator(object):
             modify_char=random.choice(matchObjs)
             #生成替换的内容
             modify_char_comment="   {}".format(modify_char,modify_char)
+
+            #替换
+            str=re.sub(modify_char, modify_char_comment, str)
+
+        return str
+
+    def addZero(self,str,seed=None):
+        #print "charTo10"
+        matchObjs = re.findall(r'[a-qA-Q]', str, re.M | re.I)
+        if matchObjs:
+            #选择替换的字符
+            modify_char=random.choice(matchObjs)
+            #生成替换的内容
+            modify_char_comment="\\00{}".format(modify_char)
+
+            #替换
+            str=re.sub(modify_char, modify_char_comment, str)
+
+        return str
+
+
+    def addEnter(self,str,seed=None):
+        #print "charTo10"
+        matchObjs = re.findall(r'[a-qA-Q]', str, re.M | re.I)
+        if matchObjs:
+            #选择替换的字符
+            modify_char=random.choice(matchObjs)
+            #生成替换的内容
+            modify_char_comment="\\r\\n{}".format(modify_char)
 
             #替换
             str=re.sub(modify_char, modify_char_comment, str)
