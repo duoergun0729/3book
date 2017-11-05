@@ -3,98 +3,71 @@ import gym
 import time
 import random
 import gym_waf.envs.wafEnv
+import pickle
 
-states = [1, 2, 3, 4, 5, 6, 7, 8]
-actions = ['n', 'e', 's', 'w']
-
-def greedy(Q,state):
-    amax = 0
-    key = "%d_%s" % (state, actions[0])
-
-    qmax = Q[key]
-    for i in range(len(actions)):
-        key = "%d_%s" % (state, actions[i])
-        q = Q[key]
-        if qmax < q:
-            qmax = q
-            amax = i
-    return actions[amax]
-
-def epsilon_greedy(Q, state, epsilon):
-    amax = 0
-    key = "%d_%s"%(state, actions[0])
-    qmax = Q[key]
-    for i in range(len(actions)):
-        key = "%d_%s"%(state, actions[i])
-        q = Q[key]
-        if qmax < q:
-            qmax = q
-            amax = i
-
-    pro = [0.0 for i in range(len(actions))]
-    pro[amax] += 1-epsilon
-    for i in range(len(actions)):
-        pro[i] += epsilon/len(actions)
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Flatten, ELU, Dropout, BatchNormalization
+from keras.optimizers import Adam, SGD, RMSprop
 
 
-    r = random.random()
-    s = 0.0
-    for i in range(len(actions)):
-        s += pro[i]
-        if s>= r: return actions[i]
-    return actions[len(actions)-1]
+from rl.agents.dqn import DQNAgent
+from rl.agents.sarsa import SarsaAgent
+from rl.policy import EpsGreedyQPolicy
+from rl.memory import SequentialMemory
+
+
+
+def generate_dense_model(input_shape, layers, nb_actions):
+    model = Sequential()
+    model.add(Flatten(input_shape=input_shape))
+    model.add(Dropout(0.1))
+
+    for layer in layers:
+        model.add(Dense(layer))
+        model.add(BatchNormalization())
+        model.add(ELU(alpha=1.0))
+
+    model.add(Dense(nb_actions))
+    model.add(Activation('linear'))
+    print(model.summary())
+
+    return model
+
+
+def train_dqn_model(layers, rounds=10000):
+    ENV_NAME = 'Waf-v0'
+    env = gym.make(ENV_NAME)
+    env.seed(1)
+    nb_actions = env.action_space.n
+    window_length = 1
+
+    print "nb_actions:"
+    print nb_actions
+    print "env.observation_space.shape:"
+    print env.observation_space.shape
+
+
+    model = generate_dense_model((window_length,) + env.observation_space.shape, layers, nb_actions)
+
+    policy = EpsGreedyQPolicy()
+
+    memory = SequentialMemory(limit=32, ignore_episode_boundaries=False, window_length=window_length)
+
+    agent = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=16,
+                     enable_double_dqn=True, enable_dueling_network=True, dueling_type='avg',
+                     target_model_update=1e-2, policy=policy, batch_size=16)
+
+    agent.compile(RMSprop(lr=1e-3), metrics=['mae'])
+
+    # play the game. learn something!
+    agent.fit(env, nb_steps=rounds, visualize=False, verbose=2)
+
+
+    return agent, model
 
 
 if __name__ == '__main__':
-    env = gym.make('Waf-v0')
-    alpha=0.1
-    gamma=0.5
-    epsilon=0.1
-    random.seed(0)
-
-    Q = dict()
-
-    print int(4.1)
-    print int(3.9)
+    agent1, model1= train_dqn_model([5, 2], rounds=1000)
+    model1.save('waf-v0.h5', overwrite=True)
 
 
-    for s in states:
-        for a in actions:
-            key = "%d_%s"%(s,a)
-            Q[key]=0
-
-    gold=0
-
-    for episode in range(10):
-        s0 = env.reset()
-        a0 = greedy(Q,s0)
-
-        #狗屎运 初始化就拿到金币了
-        if s0 == 7 :
-            continue
-
-        #print("Episode start at state:{}".format(s0))
-        for t in range(50):
-            observation, reward, done, info = env.step(a0)
-            s1=observation
-            #贪婪算法
-            #a1 = greedy(Q, s1)
-            #epsilon贪婪算法
-            a1 = epsilon_greedy(Q,s1,epsilon)
-
-            key0=   "%d_%s" % (s0, a0)
-            key1 = "%d_%s" % (s1, a1)
-            #更新Q函数
-            Q[key0] = Q[key0] + alpha * (reward + gamma * Q[key1] - Q[key0])
-            a0=a1
-            s0=s1
-            if done and s1==7 :
-                print("Get Gold {}th Episode finished after {} timesteps ".format(episode,t+1))
-                gold+=1
-                break
-            if done :
-                #print("Episode finished after {} timesteps ".format(t + 1))
-                break
-
-
-    print "episode:{} get gold:{}".format(episode,gold)

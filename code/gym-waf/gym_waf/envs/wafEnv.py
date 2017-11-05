@@ -3,6 +3,12 @@ import numpy
 import random
 from gym import spaces
 import gym
+from features import Features
+from waf import Waf_Check
+from xss_manipulator import Xss_Manipulator
+
+
+ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
 
 
 class WafEnv_v0(gym.Env):
@@ -11,83 +17,62 @@ class WafEnv_v0(gym.Env):
     }
 
     def __init__(self):
+        self.action_space = spaces.Discrete(len(ACTION_LOOKUP))
+        self.samples_file="xss-samples.txt"
+        #xss样本特征集合
+        self.samples=[]
+        #当前处理的样本
+        self.current_sample=""
+        #self.current_state=0
+        self.features_extra=Features()
+        self.waf_checker=Waf_Check()
+        #根据动作修改当前样本免杀
+        self.xss_manipulatorer= Xss_Manipulator()
 
-        self.states = [1,2,3,4,5,6,7,8]
+        with open(self.samples_file) as f:
+            for line in f:
+                line=line.strip('\n')
+                print "Add xss sample:"+line
+                self.samples.append(line)
 
-        self.terminate_states = dict()
-        self.terminate_states[6] = 1
-        self.terminate_states[7] = 1
-        self.terminate_states[8] = 1
 
-        self.actions = ['n','e','s','w']
+        self._reset()
 
-        self.rewards = dict();
-        self.rewards['1_s'] = -1.0
-        self.rewards['3_s'] = 1.0
-        self.rewards['5_s'] = -1.0
 
-        self.t = dict();
-        self.t['1_s'] = 6
-        self.t['1_e'] = 2
-        self.t['2_w'] = 1
-        self.t['2_e'] = 3
-        self.t['3_s'] = 7
-        self.t['3_w'] = 2
-        self.t['3_e'] = 4
-        self.t['4_w'] = 3
-        self.t['4_e'] = 5
-        self.t['5_s'] = 8
-        self.t['5_w'] = 4
 
-        self.gamma = 0.8
-        self.viewer = None
-        self.state = None
-
-    def getTerminal(self):
-        return self.terminate_states
-
-    def getGamma(self):
-        return self.gamma
-
-    def getStates(self):
-        return self.states
-
-    def getAction(self):
-        return self.actions
-    def getTerminate_states(self):
-        return self.terminate_states
-    def setAction(self,s):
-        self.state=s
 
     def _step(self, action):
 
-        state = self.state
-        #判断是否游戏结束
-        if state in self.terminate_states:
-            return state, 0, True, {}
-        key = "%d_%s"%(state, action)
-        #查找状态迁移表
-        if key in self.t:
-            next_state = self.t[key]
+        r=0
+        is_gameover=False
+        print "current sample:%s" % self.current_sample
+
+        _action=ACTION_LOOKUP[action]
+        print "action is %s" % _action
+
+        self.current_sample=self.xss_manipulatorer.modify(self.current_sample,_action)
+        print "change current sample to %s" % self.current_sample
+
+        if self.waf_checker.check_xss(self.current_sample):
+            print "Match waf rule"
         else:
-            #查不到就状态不变
-            next_state = state
-        self.state = next_state
+            #给奖励
+            r=10
+            is_gameover=True
+            print "Good!!!!!!!"
 
-        is_terminal = False
+        self.observation_space=self.features_extra.extract(self.current_sample)
 
-        if next_state in self.terminate_states:
-            is_terminal = True
-
-        if key not in self.rewards:
-            r = 0.0
-        else:
-            r = self.rewards[key]
+        return self.observation_space, r,is_gameover,{}
 
 
-        return next_state, r,is_terminal,{}
     def _reset(self):
-        self.state = self.states[int(random.random() * len(self.states))]
-        return self.state
+        self.current_sample=random.choice(self.samples)
+        print "reset current_sample=" + self.current_sample
+
+        self.observation_space=self.features_extra.extract(self.current_sample)
+        return self.observation_space
+
+
     def render(self, mode='human', close=False):
         return
