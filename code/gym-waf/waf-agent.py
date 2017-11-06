@@ -24,7 +24,8 @@ from gym_waf.envs.xss_manipulator import Xss_Manipulator
 
 ENV_NAME = 'Waf-v0'
 #尝试的最大次数
-nb_max_episode_steps=20
+nb_max_episode_steps_train=20
+nb_max_episode_steps_test=3
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
 
@@ -72,7 +73,7 @@ def train_dqn_model(layers, rounds=10000):
 
     # play the game. learn something!
     #nb_max_episode_steps 一次学习周期中最大步数
-    agent.fit(env, nb_steps=rounds, nb_max_episode_steps=nb_max_episode_steps,visualize=False, verbose=2)
+    agent.fit(env, nb_steps=rounds, nb_max_episode_steps=nb_max_episode_steps_train,visualize=False, verbose=2)
 
     #print "#################Start Test%################"
 
@@ -94,7 +95,7 @@ def train_dqn_model(layers, rounds=10000):
         #print sample
         sum+=1
 
-        for _ in range(nb_max_episode_steps):
+        for _ in range(nb_max_episode_steps_test):
 
             if not waf_checker.check_xss(sample) :
                 success+=1
@@ -112,7 +113,7 @@ def train_dqn_model(layers, rounds=10000):
 
 
 if __name__ == '__main__':
-    agent1, model1= train_dqn_model([5, 2], rounds=100)
+    agent1, model1= train_dqn_model([5, 2], rounds=1000)
     model1.save('waf-v0.h5', overwrite=True)
 
 

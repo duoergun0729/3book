@@ -9,7 +9,8 @@ from xss_manipulator import Xss_Manipulator
 #新版接口
 from sklearn.model_selection import train_test_split
 
-samples_file="xss-samples.txt"
+#samples_file="xss-samples.txt"
+samples_file="xss-samples-all.txt"
 samples=[]
 with open(samples_file) as f:
     for line in f:

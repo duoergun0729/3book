@@ -138,7 +138,7 @@ class Xss_Manipulator(object):
 
         return str
 
-    def modify(self,str, _action, seed=None):
+    def modify(self,str, _action, seed=6):
 
         #print "Do action :%s" % _action
         action_func=Xss_Manipulator().__getattribute__(_action)
