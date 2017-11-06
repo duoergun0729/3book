@@ -9,6 +9,16 @@ from xss_manipulator import Xss_Manipulator
 #新版接口
 from sklearn.model_selection import train_test_split
 
+samples_file="xss-samples.txt"
+samples=[]
+with open(samples_file) as f:
+    for line in f:
+        line = line.strip('\n')
+        print "Add xss sample:" + line
+        samples.append(line)
+
+# 划分训练和测试集合
+samples_train, samples_test = train_test_split(samples, test_size=0.4)
 
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
@@ -21,9 +31,9 @@ class WafEnv_v0(gym.Env):
 
     def __init__(self):
         self.action_space = spaces.Discrete(len(ACTION_LOOKUP))
-        self.samples_file="xss-samples.txt"
+
         #xss样本特征集合
-        self.samples=[]
+        #self.samples=[]
         #当前处理的样本
         self.current_sample=""
         #self.current_state=0
@@ -33,21 +43,11 @@ class WafEnv_v0(gym.Env):
         self.xss_manipulatorer= Xss_Manipulator()
 
 
-        with open(self.samples_file) as f:
-            for line in f:
-                line=line.strip('\n')
-                print "Add xss sample:"+line
-                self.samples.append(line)
 
-        #划分训练和测试集合
-        self.samples_train, self.samples_test = train_test_split(self.samples, test_size=0.4)
 
 
         self._reset()
 
-
-    def get_samples_test(self):
-        return self.samples_test
 
 
     def _step(self, action):
@@ -74,7 +74,7 @@ class WafEnv_v0(gym.Env):
 
 
     def _reset(self):
-        self.current_sample=random.choice(self.samples_train)
+        self.current_sample=random.choice(samples_train)
         print "reset current_sample=" + self.current_sample
 
         self.observation_space=self.features_extra.extract(self.current_sample)

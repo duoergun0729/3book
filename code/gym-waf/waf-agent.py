@@ -4,6 +4,7 @@ import time
 import random
 import gym_waf.envs.wafEnv
 import pickle
+import numpy as np
 
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Flatten, ELU, Dropout, BatchNormalization
@@ -15,7 +16,17 @@ from rl.agents.sarsa import SarsaAgent
 from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
+
+from gym_waf.envs.wafEnv  import samples_test,samples_train
+from gym_waf.envs.features import Features
+from gym_waf.envs.waf import Waf_Check
+from gym_waf.envs.xss_manipulator import Xss_Manipulator
+
 ENV_NAME = 'Waf-v0'
+#尝试的最大次数
+nb_max_episode_steps=20
+
+ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
 
 def generate_dense_model(input_shape, layers, nb_actions):
     model = Sequential()
@@ -61,17 +72,47 @@ def train_dqn_model(layers, rounds=10000):
 
     # play the game. learn something!
     #nb_max_episode_steps 一次学习周期中最大步数
-    agent.fit(env, nb_steps=rounds, nb_max_episode_steps=100,visualize=False, verbose=2)
+    agent.fit(env, nb_steps=rounds, nb_max_episode_steps=nb_max_episode_steps,visualize=False, verbose=2)
 
-    print "#################Start Test%################"
+    #print "#################Start Test%################"
 
-    agent.test(env, nb_episodes=100)
+    #agent.test(env, nb_episodes=100)
+
+    test_samples=samples_test
+
+    features_extra = Features()
+    waf_checker = Waf_Check()
+    # 根据动作修改当前样本免杀
+    xss_manipulatorer = Xss_Manipulator()
+
+    success=0
+    sum=0
+
+    shp = (1,) + tuple(model.input_shape[1:])
+
+    for sample in samples_test:
+        #print sample
+        sum+=1
+
+        for _ in range(nb_max_episode_steps):
+
+            if not waf_checker.check_xss(sample) :
+                success+=1
+                print sample
+                break
+
+            f = features_extra.extract(sample).reshape(shp)
+            act_values = model.predict(f)
+            action=np.argmax(act_values[0])
+            sample=xss_manipulatorer.modify(sample,ACTION_LOOKUP[action])
+
+    print "Sum:{} Success:{}".format(sum,success)
 
     return agent, model
 
 
 if __name__ == '__main__':
-    agent1, model1= train_dqn_model([5, 2], rounds=1000)
+    agent1, model1= train_dqn_model([5, 2], rounds=100)
     model1.save('waf-v0.h5', overwrite=True)
 
 
