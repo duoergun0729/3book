@@ -6,6 +6,9 @@ import gym
 from features import Features
 from waf import Waf_Check
 from xss_manipulator import Xss_Manipulator
+#新版接口
+from sklearn.model_selection import train_test_split
+
 
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
@@ -29,11 +32,15 @@ class WafEnv_v0(gym.Env):
         #根据动作修改当前样本免杀
         self.xss_manipulatorer= Xss_Manipulator()
 
+
         with open(self.samples_file) as f:
             for line in f:
                 line=line.strip('\n')
                 print "Add xss sample:"+line
                 self.samples.append(line)
+
+        #划分训练和测试集合
+        self.samples_train, self.samples_test = train_test_split(self.samples, test_size=0.4)
 
 
         self._reset()
@@ -65,7 +72,7 @@ class WafEnv_v0(gym.Env):
 
 
     def _reset(self):
-        self.current_sample=random.choice(self.samples)
+        self.current_sample=random.choice(self.samples_train)
         print "reset current_sample=" + self.current_sample
 
         self.observation_space=self.features_extra.extract(self.current_sample)
