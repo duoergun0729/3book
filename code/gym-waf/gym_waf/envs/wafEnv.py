@@ -46,6 +46,8 @@ class WafEnv_v0(gym.Env):
         self._reset()
 
 
+    def get_samples_test(self):
+        return self.samples_test
 
 
     def _step(self, action):
