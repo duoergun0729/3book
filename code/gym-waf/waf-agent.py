@@ -24,7 +24,7 @@ from gym_waf.envs.xss_manipulator import Xss_Manipulator
 
 ENV_NAME = 'Waf-v0'
 #尝试的最大次数
-nb_max_episode_steps_train=20
+nb_max_episode_steps_train=50
 nb_max_episode_steps_test=3
 
 ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}

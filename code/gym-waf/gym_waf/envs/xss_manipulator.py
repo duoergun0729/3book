@@ -88,7 +88,8 @@ class Xss_Manipulator(object):
             #选择替换的字符
             modify_char=random.choice(matchObjs)
             #生成替换的内容
-            modify_char_comment="{}/*a{}*/".format(modify_char,modify_char)
+            #modify_char_comment="{}/*a{}*/".format(modify_char,modify_char)
+            modify_char_comment = "{}/*8888*/".format(modify_char)
 
             #替换
             str=re.sub(modify_char, modify_char_comment, str)
@@ -102,10 +103,10 @@ class Xss_Manipulator(object):
             #选择替换的字符
             modify_char=random.choice(matchObjs)
             #生成替换的内容
-            modify_char_comment="   {}".format(modify_char,modify_char)
+            modify_char_tab="   {}".format(modify_char)
 
             #替换
-            str=re.sub(modify_char, modify_char_comment, str)
+            str=re.sub(modify_char, modify_char_tab, str)
 
         return str
 
@@ -116,10 +117,10 @@ class Xss_Manipulator(object):
             #选择替换的字符
             modify_char=random.choice(matchObjs)
             #生成替换的内容
-            modify_char_comment="\\00{}".format(modify_char)
+            modify_char_zero="\\00{}".format(modify_char)
 
             #替换
-            str=re.sub(modify_char, modify_char_comment, str)
+            str=re.sub(modify_char, modify_char_zero, str)
 
         return str
 
@@ -131,16 +132,16 @@ class Xss_Manipulator(object):
             #选择替换的字符
             modify_char=random.choice(matchObjs)
             #生成替换的内容
-            modify_char_comment="\\r\\n{}".format(modify_char)
+            modify_char_enter="\\r\\n{}".format(modify_char)
 
             #替换
-            str=re.sub(modify_char, modify_char_comment, str)
+            str=re.sub(modify_char, modify_char_enter, str)
 
         return str
 
     def modify(self,str, _action, seed=6):
 
-        #print "Do action :%s" % _action
+        print "Do action :%s" % _action
         action_func=Xss_Manipulator().__getattribute__(_action)
 
         return action_func(str,seed)

@@ -43,10 +43,6 @@ class WafEnv_v0(gym.Env):
         #根据动作修改当前样本免杀
         self.xss_manipulatorer= Xss_Manipulator()
 
-
-
-
-
         self._reset()
 
 
