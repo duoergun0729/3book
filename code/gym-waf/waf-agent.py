@@ -22,6 +22,8 @@ from gym_waf.envs.features import Features
 from gym_waf.envs.waf import Waf_Check
 from gym_waf.envs.xss_manipulator import Xss_Manipulator
 
+from keras.callbacks import TensorBoard
+
 ENV_NAME = 'Waf-v0'
 #尝试的最大次数
 nb_max_episode_steps_train=50
@@ -71,6 +73,8 @@ def train_dqn_model(layers, rounds=10000):
 
     agent.compile(RMSprop(lr=1e-3), metrics=['mae'])
 
+    #tb_cb = TensorBoard(log_dir='/tmp/log', write_images=1, histogram_freq=1)
+    #cbks = [tb_cb]
     # play the game. learn something!
     #nb_max_episode_steps 一次学习周期中最大步数
     agent.fit(env, nb_steps=rounds, nb_max_episode_steps=nb_max_episode_steps_train,visualize=False, verbose=2)
