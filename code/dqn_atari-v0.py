@@ -45,7 +45,7 @@ class AtariProcessor(Processor):
         return np.clip(reward, -1., 1.)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--mode', choices=['train', 'test'], default='train')
+parser.add_argument('--mode', choices=['train', 'test','show'], default='show')
 parser.add_argument('--env-name', type=str, default='Pong-v0')
 parser.add_argument('--weights', type=str, default=None)
 args = parser.parse_args()
@@ -92,8 +92,9 @@ processor = AtariProcessor()
 # the agent initially explores the environment (high eps) and then gradually sticks to what it knows
 # (low eps). We also set a dedicated eps value that is used during testing. Note that we set it to 0.05
 # so that the agent still performs some random actions. This ensures that the agent cannot get stuck.
-policy = LinearAnnealedPolicy(EpsGreedyQPolicy(), attr='eps', value_max=1., value_min=.1, value_test=.05,
-                              nb_steps=1000000)
+#policy = LinearAnnealedPolicy(EpsGreedyQPolicy(), attr='eps', value_max=1., value_min=.1, value_test=.05,
+#                              nb_steps=1000000)
+policy = EpsGreedyQPolicy()
 
 # The trade-off between exploration and exploitation is difficult and an on-going research topic.
 # If you want, you can experiment with the parameters or use a different policy. Another popular one
@@ -126,6 +127,12 @@ if args.mode == 'train':
     dqn.test(env, nb_episodes=10, visualize=True)
 elif args.mode == 'test':
     weights_filename = 'dqn_{}_weights.h5f'.format(args.env_name)
+    if args.weights:
+        weights_filename = args.weights
+    dqn.load_weights(weights_filename)
+    dqn.test(env, nb_episodes=10, visualize=True)
+else:
+    weights_filename = 'dqn_Pong-100000-v0_weights.h5f'
     if args.weights:
         weights_filename = args.weights
     dqn.load_weights(weights_filename)
