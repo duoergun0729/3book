@@ -122,7 +122,7 @@ def train_dqn_model(layers, rounds=10000):
 
 if __name__ == '__main__':
 
-    agent1, model1= train_dqn_model([16, 8], rounds=3000)
+    agent1, model1= train_dqn_model([16, 8], rounds=1000)
     model1.save('spam-v0.h5', overwrite=True)
 
 
