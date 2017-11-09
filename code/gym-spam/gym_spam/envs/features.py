@@ -1,38 +1,35 @@
 #-*- coding:utf-8 –*-
 
 import numpy as np
-
+#from spam import mode_file,vocabulary_file
+import re
+import os
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.externals import joblib
 
 
 
 class Features(object):
-    def __init__(self):
+    def __init__(self,vocabulary_file):
         self.dim = 0
-        self.name=""
+        self.name="Spam_Features"
         self.dtype=np.float32
+        self.vocabulary_file=vocabulary_file
 
-    def byte_histogram(self,str):
-        #bytes=np.array(list(str))
-        bytes=[ord(ch) for ch in list(str)]
-        #print bytes
-
-        h = np.bincount(bytes, minlength=256)
-        return np.concatenate([
-            [h.sum()],  # total size of the byte stream
-            h.astype(self.dtype).flatten() / h.sum(),  # normalized the histogram
-        ])
 
     def extract(self,str):
+        featurevectors=None
+        #print str
+        if os.path.exists(self.vocabulary_file):
+            vocabulary = joblib.load(self.vocabulary_file)
+            vectorizer = CountVectorizer(   decode_error='ignore',
+                                            vocabulary=vocabulary,
+                                            strip_accents='ascii',
+                                            stop_words='english',
+                                            max_df=1.0,
+                                            min_df=1)
+            #CountVectorizer产生的是稀疏矩阵 所以需要使用toarray()转换成了numpy结构
+            featurevectors=vectorizer.transform([str]).toarray()
 
-        featurevectors = [
-            [self.byte_histogram(str)]
-        ]
         return np.concatenate(featurevectors)
 
-
-if __name__ == '__main__':
-    f=Features()
-    a=f.extract("alert()")
-    print a
-    print a.shape
-    #print a.shape[0]

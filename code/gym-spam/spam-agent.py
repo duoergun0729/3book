@@ -2,7 +2,7 @@
 import gym
 import time
 import random
-import gym_waf.envs.wafEnv
+import gym_spam.envs.spamEnv
 import pickle
 import numpy as np
 
@@ -17,19 +17,22 @@ from rl.policy import EpsGreedyQPolicy
 from rl.memory import SequentialMemory
 
 
-from gym_waf.envs.wafEnv  import samples_test,samples_train
-from gym_waf.envs.features import Features
-from gym_waf.envs.waf import Waf_Check
-from gym_waf.envs.xss_manipulator import Xss_Manipulator
+from gym_spam.envs.spamEnv  import samples_test,samples_train
+from gym_spam.envs.features import Features
+from gym_spam.envs.spam import Spam_Check,vocabulary_file
+from gym_spam.envs.spam_manipulator import Spam_Manipulator
 
 from keras.callbacks import TensorBoard
 
-ENV_NAME = 'Waf-v0'
+ENV_NAME = 'Spam-v0'
 #尝试的最大次数
 nb_max_episode_steps_train=50
 nb_max_episode_steps_test=3
 
-ACTION_LOOKUP = {i: act for i, act in enumerate(Xss_Manipulator.ACTION_TABLE.keys())}
+ACTION_LOOKUP = {i: act for i, act in enumerate(Spam_Manipulator.ACTION_TABLE.keys())}
+
+
+
 
 def generate_dense_model(input_shape, layers, nb_actions):
     model = Sequential()
@@ -65,7 +68,7 @@ def train_dqn_model(layers, rounds=10000):
 
     policy = EpsGreedyQPolicy()
 
-    memory = SequentialMemory(limit=256, ignore_episode_boundaries=False, window_length=window_length)
+    memory = SequentialMemory(limit=1000000, ignore_episode_boundaries=False, window_length=window_length)
 
     agent = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=16,
                      enable_double_dqn=True, enable_dueling_network=True, dueling_type='avg',
@@ -83,12 +86,12 @@ def train_dqn_model(layers, rounds=10000):
 
     #agent.test(env, nb_episodes=100)
 
-    test_samples=samples_test
+    #test_samples=samples_test
 
-    features_extra = Features()
-    waf_checker = Waf_Check()
+    features_extract = Features(vocabulary_file)
+    spam_checker = Spam_Check()
     # 根据动作修改当前样本免杀
-    xss_manipulatorer = Xss_Manipulator()
+    spam_manipulatorer = Spam_Manipulator()
 
     success=0
     sum=0
@@ -100,16 +103,17 @@ def train_dqn_model(layers, rounds=10000):
         sum+=1
 
         for _ in range(nb_max_episode_steps_test):
-
-            if not waf_checker.check_xss(sample) :
+            featurevectors = features_extract.extract(sample)
+            if spam_checker.check_spam(featurevectors)<1.0:
                 success+=1
+                print "Bypass spam rule!:"
                 print sample
                 break
 
-            f = features_extra.extract(sample).reshape(shp)
+            f = features_extract.extract(sample).reshape(shp)
             act_values = model.predict(f)
             action=np.argmax(act_values[0])
-            sample=xss_manipulatorer.modify(sample,ACTION_LOOKUP[action])
+            sample=spam_manipulatorer.modify(sample,ACTION_LOOKUP[action])
 
     print "Sum:{} Success:{}".format(sum,success)
 
@@ -117,8 +121,9 @@ def train_dqn_model(layers, rounds=10000):
 
 
 if __name__ == '__main__':
-    agent1, model1= train_dqn_model([5, 2], rounds=1000)
-    model1.save('waf-v0.h5', overwrite=True)
+
+    agent1, model1= train_dqn_model([16, 8], rounds=3000)
+    model1.save('spam-v0.h5', overwrite=True)
 
 
 

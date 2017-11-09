@@ -1,1 +1,1 @@
-from gym_waf.envs.wafEnv import WafEnv_v0
+from gym_spam.envs.spamEnv import SpamEnv_v0
