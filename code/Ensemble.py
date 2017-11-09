@@ -8,6 +8,7 @@ import xgboost as xgb
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
+from matplotlib import pyplot as plt
 
 
 def func1():
@@ -33,7 +34,16 @@ def func1():
     print "AUC:"
     print metrics.roc_auc_score(test_Y, pred_Y)
 
+    f_pos, t_pos, thresh = metrics.roc_curve(test_Y, pred_Y)
+    auc_area = metrics.auc(f_pos, t_pos)
 
+    plt.plot(f_pos, t_pos, 'darkorange', lw=2, label='AUC = %.2f' % auc_area)
+    plt.legend(loc='lower right')
+    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+    plt.title('ROC')
+    plt.ylabel('True Pos Rate')
+    plt.xlabel('False Pos Rate')
+    plt.show()
 
 if __name__ == '__main__':
     func1()
