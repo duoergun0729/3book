@@ -4,7 +4,7 @@ DCGAN on MNIST using Keras
 Author: Rowel Atienza
 Project: https://github.com/roatienza/Deep-Learning-Experiments
 Dependencies: tensorflow 1.0 and keras 2.0
-Usage: python3 dcgan_mnist.py
+Usage: python dcgan_mnist.py
 '''
 
 import numpy as np
@@ -118,7 +118,8 @@ class DCGAN(object):
     def discriminator_model(self):
         if self.DM:
             return self.DM
-        optimizer = RMSprop(lr=0.0002, decay=6e-8)
+        #optimizer = RMSprop(lr=0.0002, decay=6e-8)
+        optimizer = RMSprop(lr=0.00002, decay=6e-8)
         self.DM = Sequential()
         self.DM.add(self.discriminator())
         self.DM.compile(loss='binary_crossentropy', optimizer=optimizer,\
@@ -206,7 +207,7 @@ class MNIST_DCGAN(object):
 if __name__ == '__main__':
     mnist_dcgan = MNIST_DCGAN()
     timer = ElapsedTimer()
-    mnist_dcgan.train(train_steps=100, batch_size=1, save_interval=10)
+    mnist_dcgan.train(train_steps=5000, batch_size=256, save_interval=10)
     timer.elapsed_time()
     mnist_dcgan.plot_images(fake=True)
     mnist_dcgan.plot_images(fake=False, save2file=True)
