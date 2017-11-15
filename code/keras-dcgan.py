@@ -253,6 +253,9 @@ def maidou_gan():
         X_train = X_train[:, :, :, None]
         X_test = X_test[:, :, :, None]
 
+
+
+
         print X_train.shape
         # X_train = X_train.reshape((X_train.shape, 1) + X_train.shape[1:])
         d = gan_discriminator_model()
@@ -260,10 +263,10 @@ def maidou_gan():
         d_on_g = gan_generator_containing_discriminator(g, d)
         d_optim = SGD(lr=0.0005, momentum=0.9, nesterov=True)
         g_optim = SGD(lr=0.0005, momentum=0.9, nesterov=True)
-        g.compile(loss='binary_crossentropy', optimizer='adam')
-        d_on_g.compile(loss='binary_crossentropy', optimizer='adam')
+        g.compile(loss='binary_crossentropy', optimizer='SGD')
+        d_on_g.compile(loss='binary_crossentropy', optimizer=g_optim)
         d.trainable = True
-        d.compile(loss='binary_crossentropy', optimizer='adam')
+        d.compile(loss='binary_crossentropy', optimizer=d_optim)
         for epoch in range(100):
             print("Epoch is", epoch)
             print("Number of batches", int(X_train.shape[0] / BATCH_SIZE))
@@ -273,6 +276,7 @@ def maidou_gan():
                 generated_images = g.predict(noise, verbose=0)
                 if index % 200 == 0:
                     image = gan_combine_images(generated_images)
+                    #之前为了处理方便 像素都是0-1的小数 这里需要还原成整数
                     image = image * 127.5 + 127.5
                     # 调试阶段不生成图片
                     Image.fromarray(image.astype(np.uint8)).save("gan/"+str(epoch)+"_"+str(index)+".png")
@@ -285,7 +289,7 @@ def maidou_gan():
                 g_loss = d_on_g.train_on_batch(noise, [1] * BATCH_SIZE)
                 d.trainable = True
                 print("batch %d g_loss : %f" % (index, g_loss))
-                if index % 10 == 9:
+                if index % 100 == 0:
                     g.save_weights('gan_generator', True)
                     d.save_weights('gan_discriminator', True)
 
