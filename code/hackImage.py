@@ -1,82 +1,196 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
 from keras.preprocessing import image
 from keras.applications import inception_v3
 from keras import backend as K
 from PIL import Image
 
-# Load pre-trained image recognition model
-model = inception_v3.InceptionV3()
 
-# Grab a reference to the first and last layer of the neural net
-model_input_layer = model.layers[0].input
-model_output_layer = model.layers[-1].output
+#演示梯度下降求解的过程  损失函数为 y=x2+2
+def demo1():
+    import random
+    a=0.1
+    x=random.randint(1,10)
+    y = x * x + 2
+    index=1
+    while index < 100 and abs(y-2) > 0.01 :
+        y=x*x+2
+        print "batch={} x={} y={}".format(index,x,y)
+        x=x-2*x*a
+        index+=1
 
-# Choose an ImageNet object to fake
-# The list of classes is available here: https://gist.github.com/ageitgey/4e1342c10a71981d0b491e1b8227328b
-# Class #859 is "toaster"
-object_type_to_fake = 859
+#演示使用现成的模型进行判断
+def demo2():
+    from keras.applications.resnet50 import preprocess_input, decode_predictions
+    model = inception_v3.InceptionV3()
+    img = image.load_img("pig.jpg", target_size=(299, 299))
+    original_image = image.img_to_array(img)
 
-# Load the image to hack
-img = image.load_img("cat.png", target_size=(299, 299))
-original_image = image.img_to_array(img)
+    original_image /= 255.
+    original_image -= 0.5
+    original_image *= 2.
 
-# Scale the image so all pixel intensities are between [-1, 1] as the model expects
-original_image /= 255.
-original_image -= 0.5
-original_image *= 2.
+    original_image = np.expand_dims(original_image, axis=0)
+    preds = model.predict(original_image)
+    print('Predicted:', decode_predictions(preds, top=3)[0])
 
-# Add a 4th dimension for batch size (as Keras expects)
-original_image = np.expand_dims(original_image, axis=0)
+#demo2()
+#demo()
+#演示使用现成的模型进行判断
+def demo3():
+    from keras.applications.resnet50 import preprocess_input, decode_predictions
+    from keras.applications.resnet50 import ResNet50
+    model = ResNet50(weights='imagenet')
 
-# Pre-calculate the maximum change we will allow to the image
-# We'll make sure our hacked image never goes past this so it doesn't look funny.
-# A larger number produces an image faster but risks more distortion.
-max_change_above = original_image + 0.01
-max_change_below = original_image - 0.01
+    img_path = 'hacked-pig-image.png'
+    img = image.load_img(img_path, target_size=(224, 224))
+    x = image.img_to_array(img)
+    x = np.expand_dims(x, axis=0)
+    x = preprocess_input(x)
 
-# Create a copy of the input image to hack on
-hacked_image = np.copy(original_image)
+    preds = model.predict(x)
+    # decode the results into a list of tuples (class, description, probability)
+    # (one such list for each sample in the batch)
+    print('Predicted:', decode_predictions(preds, top=3)[0])
 
-# How much to update the hacked image in each iteration
-learning_rate = 0.1
+#demo3()
 
-# Define the cost function.
-# Our 'cost' will be the likelihood out image is the target class according to the pre-trained model
-cost_function = model_output_layer[0, object_type_to_fake]
+def demo4():
+    model = inception_v3.InceptionV3()
 
-# We'll ask Keras to calculate the gradient based on the input image and the currently predicted class
-# In this case, referring to "model_input_layer" will give us back image we are hacking.
-gradient_function = K.gradients(cost_function, model_input_layer)[0]
+    model_input_layer = model.layers[0].input
+    model_output_layer = model.layers[-1].output
 
-# Create a Keras function that we can call to calculate the current cost and gradient
-grab_cost_and_gradients_from_model = K.function([model_input_layer, K.learning_phase()], [cost_function, gradient_function])
+    object_type_to_fake = 859
 
-cost = 0.0
 
-# In a loop, keep adjusting the hacked image slightly so that it tricks the model more and more
-# until it gets to at least 80% confidence
-while cost < 0.80:
-    # Check how close the image is to our target class and grab the gradients we
-    # can use to push it one more step in that direction.
-    # Note: It's really important to pass in '0' for the Keras learning mode here!
-    # Keras layers behave differently in prediction vs. train modes!
-    cost, gradients = grab_cost_and_gradients_from_model([hacked_image, 0])
+    img = image.load_img("pig.jpg", target_size=(299, 299))
+    original_image = image.img_to_array(img)
 
-    # Move the hacked image one step further towards fooling the model
-    hacked_image += gradients * learning_rate
+    original_image /= 255.
+    original_image -= 0.5
+    original_image *= 2.
 
-    # Ensure that the image doesn't ever change too much to either look funny or to become an invalid image
-    hacked_image = np.clip(hacked_image, max_change_below, max_change_above)
-    hacked_image = np.clip(hacked_image, -1.0, 1.0)
+    original_image = np.expand_dims(original_image, axis=0)
 
-    print("Model's predicted likelihood that the image is a toaster: {:.8}%".format(cost * 100))
 
-# De-scale the image's pixels from [-1, 1] back to the [0, 255] range
-img = hacked_image[0]
-img /= 2.
-img += 0.5
-img *= 255.
+    max_change_above = original_image + 0.01
+    max_change_below = original_image - 0.01
 
-# Save the hacked image!
-im = Image.fromarray(img.astype(np.uint8))
-im.save("hacked-image.png")
+
+    hacked_image = np.copy(original_image)
+
+
+    learning_rate = 0.1
+
+
+    cost_function = model_output_layer[0, object_type_to_fake]
+
+
+    gradient_function = K.gradients(cost_function, model_input_layer)[0]
+
+
+    grab_cost_and_gradients_from_model = K.function([model_input_layer, K.learning_phase()], [cost_function, gradient_function])
+
+    cost = 0.0
+
+    index=1
+    while cost < 0.60:
+
+        cost, gradients = grab_cost_and_gradients_from_model([hacked_image, 0])
+
+
+        hacked_image += gradients * learning_rate
+        #print gradients
+
+        hacked_image = np.clip(hacked_image, max_change_below, max_change_above)
+        hacked_image = np.clip(hacked_image, -1.0, 1.0)
+
+        print("batch:{} Cost: {:.8}%".format(index,cost * 100))
+        index+=1
+
+    img = hacked_image[0]
+    img /= 2.
+    img += 0.5
+    img *= 255.
+
+    im = Image.fromarray(img.astype(np.uint8))
+    im.save("hacked-pig-image.png")
+
+
+def demo5():
+    model = inception_v3.InceptionV3()
+
+    model_input_layer = model.layers[0].input
+    model_output_layer = model.layers[-1].output
+
+    object_type_to_fake = 859
+
+
+    img = image.load_img("pig.jpg", target_size=(299, 299))
+    original_image = image.img_to_array(img)
+
+    original_image /= 255.
+    original_image -= 0.5
+    original_image *= 2.
+
+    original_image = np.expand_dims(original_image, axis=0)
+
+
+    max_change_above = original_image + 0.01
+    max_change_below = original_image - 0.01
+
+
+    hacked_image = np.copy(original_image)
+
+
+
+
+
+    cost_function = model_output_layer[0, object_type_to_fake]
+
+
+    gradient_function = K.gradients(cost_function, model_input_layer)[0]
+
+
+    grab_cost_and_gradients_from_model = K.function([model_input_layer, K.learning_phase()], [cost_function, gradient_function])
+
+    cost = 0.0
+
+    index=1
+
+    learning_rate = 0.3
+
+
+    e=0.007
+
+
+
+    while cost < 0.99:
+
+        cost, gradients = grab_cost_and_gradients_from_model([hacked_image, 0])
+
+        #fast gradient sign method
+        #EXPLAINING AND HARNESSING ADVERSARIAL EXAMPLES
+        #hacked_image += gradients * learning_rate
+        n=np.sign(gradients)
+        hacked_image +=n*e
+        #print gradients
+
+        hacked_image = np.clip(hacked_image, max_change_below, max_change_above)
+        hacked_image = np.clip(hacked_image, -1.0, 1.0)
+
+        print("batch:{} Cost: {:.8}%".format(index,cost * 100))
+        index+=1
+
+    img = hacked_image[0]
+    img /= 2.
+    img += 0.5
+    img *= 255.
+
+    im = Image.fromarray(img.astype(np.uint8))
+    im.save("hacked-pig-image.png")
+
+if __name__ == '__main__':
+    demo5()
