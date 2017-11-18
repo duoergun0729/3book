@@ -1,0 +1,5 @@
+*.pickle
+*.pkl
+*.pyc
+*.h5
+*.png
