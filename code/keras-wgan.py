@@ -17,7 +17,7 @@ import argparse
 import math
 import keras.backend as K
 from keras.utils.generic_utils import Progbar
-#from keras.utils import plot_model
+from keras.utils import plot_model
 
 
 #wgan的改进
@@ -33,7 +33,7 @@ def generator_model():
     model.add(Dense(input_dim=100, units=1024))
     model.add(Activation('tanh'))
     model.add(Dense(128*7*7))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('tanh'))
     model.add(Reshape((7, 7, 128), input_shape=(128*7*7,)))
     model.add(UpSampling2D(size=(2, 2)))
@@ -43,7 +43,7 @@ def generator_model():
     model.add(Conv2D(1, (5, 5), padding='same'))
     model.add(Activation('tanh'))
 
-    #plot_model(model, show_shapes=True, to_file='wgan/keras-wgan-generator_model.png')
+    plot_model(model, show_shapes=True, to_file='wgan/keras-wgan-generator_model.png')
     return model
 
 
@@ -68,7 +68,7 @@ def discriminator_model():
 
     model.add(GlobalAveragePooling2D())
 
-    #plot_model(model, show_shapes=True, to_file='wgan/keras-wgan-discriminator_model.png')
+    plot_model(model, show_shapes=True, to_file='wgan/keras-wgan-discriminator_model.png')
     return model
 
 
@@ -78,7 +78,7 @@ def generator_containing_discriminator(g, d):
     d.trainable = False
     model.add(d)
 
-    #plot_model(model, show_shapes=True, to_file='wgan/keras-dcgan-gan_model.png')
+    plot_model(model, show_shapes=True, to_file='wgan/keras-wgan-gan_model.png')
     return model
 
 
