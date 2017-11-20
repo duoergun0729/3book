@@ -11,6 +11,7 @@ from keras.layers.pooling import GlobalAveragePooling2D
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers.core import Flatten
 from keras.optimizers import SGD,RMSprop,adam
+from keras.losses import binary_crossentropy
 from keras.datasets import mnist
 import keras
 import numpy as np
@@ -122,6 +123,31 @@ def getDataFromMnist():
     #print type(index)
     #print y_train
     #print x_train
+    return x_train
+
+
+#获取数字0的图案
+def getZeroFromMnist():
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+    #print x_train[0]
+    #原有范围在0-255转换到 0-1
+    #x_train = (x_train.astype(np.float32) - 127.5)/127.5
+    #原有范围在0-255转换调整到-1和1之间
+    x_train = x_train.astype(np.float32)/255.0
+    x_train-=0.5
+    x_train*=2.0
+
+
+    x_train = x_train[:, :, :, None]
+    x_test = x_test[:, :, :, None]
+
+    index=np.where(y_train==0)
+    print "Raw train data shape:{}".format(x_train.shape)
+    x_train=x_train[index]
+    print "All 0 train data shape:{}".format(x_train.shape)
+    x_train=x_train[-1:]
+    print "Selected 1 1-9 train data shape:{}".format(x_train.shape)
+
     return x_train
 
 
@@ -249,7 +275,7 @@ def trainAutoEncode():
     x_test-=0.5
     x_test*=2.0
 
-    print x_test
+    #print x_test
 
     print('x_train shape:', x_train.shape)
     print(x_train.shape[0], 'train samples')
@@ -288,13 +314,34 @@ def trainAutoEncode():
 def hackAutoEncode():
     raw_images=getDataFromMnist()
     generator_images=np.copy(raw_images)
-    image=get_images(generator_images)
-    image = (image/2.0+0.5)*255.0
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-raw.png")
-    image=255.0-image
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-raw-w.png")
+    #image=get_images(generator_images)
+    #image = (image/2.0+0.5)*255.0
+    #Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-raw.png")
+    #image=255.0-image
+    #Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-raw-w.png")
+
+    generator_images=generator_images.reshape(100,784)
 
     model = trainAutoEncode()
+
+    # 都伪装成0
+    object_type_to_fake = getZeroFromMnist()
+    object_type_to_fake=object_type_to_fake.reshape(28*28)
+    object_type_to_fake = np.expand_dims(object_type_to_fake, axis=0)
+    #print object_type_to_fake
+
+    model_input_layer = model.layers[0].input
+    model_output_layer = model.layers[-1].output
+    #生成的图像与图案0之间的差为损失函数
+    #cost_function = binary_crossentropy(y_pred,object_type_to_fake)
+    #cost_function = K.mean(K.binary_crossentropy(model_output_layer,object_type_to_fake))
+    cost_function=K.mean(K.square(model_output_layer-object_type_to_fake))
+    gradient_function = K.gradients(cost_function, model_input_layer)[0]
+    grab_cost_and_gradients_from_model = K.function([model_input_layer, K.learning_phase()],
+                                                    [cost_function, gradient_function])
+    cost = 0.0
+
+    e = 0.007
 
     progress_bar = Progbar(target=100)
     for index in range(100):
@@ -303,15 +350,42 @@ def hackAutoEncode():
         mnist_image_hacked = np.copy(mnist_image_raw)
         mnist_image_hacked=mnist_image_hacked.reshape(28*28)
         mnist_image_hacked = np.expand_dims(mnist_image_hacked, axis=0)
-        #print mnist_image_hacked.shape
-        preds = model.predict(mnist_image_hacked)
-        mnist_image_hacked=preds
-        #print preds
+
+
+        #print "mnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
+
+        #调整的极限 灰度图片
+        max_change_above = mnist_image_raw + 1.0
+        max_change_below = mnist_image_raw - 1.0
+
+        i=0
+        cost=0
+        #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
+        while cost > 0.1:
+            #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
+            cost, gradients = grab_cost_and_gradients_from_model([mnist_image_hacked, 0])
+            print cost
+
+            # fast gradient sign method
+            # EXPLAINING AND HARNESSING ADVERSARIAL EXAMPLES
+            # hacked_image += gradients * learning_rate
+            n = np.sign(gradients)
+            mnist_image_hacked += n * e
+
+            mnist_image_hacked = np.clip(mnist_image_hacked, max_change_below, max_change_above)
+            mnist_image_hacked = np.clip(mnist_image_hacked, -1.0, 1.0)
+
+            #print("batch:{} Cost: {:.8}%".format(i, cost * 100))
+            #progress_bar.update(index,values=[('cost',cost),('batch',i)],force=True)
+            i += 1
+
+
 
         #覆盖原有图片
-        mnist_image_hacked=mnist_image_hacked.reshape(28,28,1)
+        #mnist_image_hacked=mnist_image_hacked.reshape(28,28,1)
         generator_images[index]=mnist_image_hacked
 
+    generator_images=generator_images.reshape(100,28,28,1)
     #保存图片
     image=get_images(generator_images)
     image = (image/2.0+0.5)*255.0
