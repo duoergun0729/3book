@@ -359,9 +359,9 @@ def hackAutoEncode():
         max_change_below = mnist_image_raw - 1.0
 
         i=0
-        cost=0
+        cost=100
         #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
-        while cost > 0.1:
+        while cost > 0.80 and i < 800:
             #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
             cost, gradients = grab_cost_and_gradients_from_model([mnist_image_hacked, 0])
             print cost
@@ -370,7 +370,7 @@ def hackAutoEncode():
             # EXPLAINING AND HARNESSING ADVERSARIAL EXAMPLES
             # hacked_image += gradients * learning_rate
             n = np.sign(gradients)
-            mnist_image_hacked += n * e
+            mnist_image_hacked -= n * e
 
             mnist_image_hacked = np.clip(mnist_image_hacked, max_change_below, max_change_above)
             mnist_image_hacked = np.clip(mnist_image_hacked, -1.0, 1.0)
