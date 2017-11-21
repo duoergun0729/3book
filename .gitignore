@@ -1,3 +1,4 @@
+*.mat
 *pickle
 *.pyc
 *.h5
