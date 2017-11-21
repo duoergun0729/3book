@@ -250,9 +250,69 @@ def hackAll():
     image[image>127]=255
     Image.fromarray(image.astype(np.uint8)).save("hackImage/100mnist-hacked-w-good.png")
 
+def trainAutoEncodeNosiy():
+    batch_size = 128
+    epochs = 20
+
+    h5file="hackAutoEncode/autoEncodeNosiy.h5"
+
+    # input image dimensions
+    img_rows, img_cols = 28, 28
+
+    # the data, shuffled and split between train and test sets
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+
+    x_train = x_train.reshape(x_train.shape[0], -1)
+    x_test = x_test.reshape(x_test.shape[0], -1)
+    input_shape = (28*28,)
+
+    #图像转换到-1到1之间
+    x_train = x_train.astype('float32') / 255.
+    x_test = x_test.astype('float32') / 255.
+    x_train-=0.5
+    x_train*=2.0
+    x_test-=0.5
+    x_test*=2.0
+
+    #print x_test
+
+    print('x_train shape:', x_train.shape)
+    print(x_train.shape[0], 'train samples')
+    print(x_test.shape[0], 'test samples')
+
+    #增加高斯噪声 均值为0 标准差为1
+    x_train_nosiy = x_train + 0.1 * np.random.normal(loc=0., scale=1., size=x_train.shape)
+    x_test_nosiy = x_test + 0.1 * np.random.normal(loc=0, scale=1, size=x_test.shape)
+    x_train_nosiy = np.clip(x_train_nosiy, -1., 1.)
+    x_test_nosiy = np.clip(x_test_nosiy, -1., 1.)
+    print(x_train_nosiy.shape, x_test_nosiy.shape)
+
+    input_img = Input(shape=input_shape)
+    encoded = Dense(100, activation='relu')(input_img)
+    decoded = Dense(784, activation='sigmoid')(encoded)
+    model = Model(inputs=[input_img], outputs=[decoded])
+
+
+    model.compile(loss='binary_crossentropy',optimizer='adam')
+
+    model.summary()
+    plot_model(model, show_shapes=True, to_file='hackAutoEncode/keras-ae.png')
+
+    #保证只有第一次调用的时候会训练参数
+    if os.path.exists(h5file):
+        model.load_weights(h5file)
+    else:
+        model.fit(x_train_nosiy, x_train, epochs=epochs, batch_size=batch_size,
+                  verbose=1, validation_data=(x_test, x_test))
+
+        model.save_weights(h5file)
+
+    return model
+
 def trainAutoEncode():
     batch_size = 128
-    epochs = 10
+    epochs = 20
 
     h5file="hackAutoEncode/autoEncode.h5"
 
@@ -281,15 +341,9 @@ def trainAutoEncode():
     print(x_train.shape[0], 'train samples')
     print(x_test.shape[0], 'test samples')
 
-    #增加高斯噪声 均值为0 标准差为1
-    x_train_nosiy = x_train + 0.3 * np.random.normal(loc=0., scale=1., size=x_train.shape)
-    x_test_nosiy = x_test + 0.3 * np.random.normal(loc=0, scale=1, size=x_test.shape)
-    x_train_nosiy = np.clip(x_train_nosiy, -1., 1.)
-    x_test_nosiy = np.clip(x_test_nosiy, -1., 1.)
-    print(x_train_nosiy.shape, x_test_nosiy.shape)
 
     input_img = Input(shape=input_shape)
-    encoded = Dense(500, activation='relu')(input_img)
+    encoded = Dense(100, activation='relu')(input_img)
     decoded = Dense(784, activation='sigmoid')(encoded)
     model = Model(inputs=[input_img], outputs=[decoded])
 
@@ -303,12 +357,13 @@ def trainAutoEncode():
     if os.path.exists(h5file):
         model.load_weights(h5file)
     else:
-        model.fit(x_train_nosiy, x_train, epochs=epochs, batch_size=batch_size,
+        model.fit(x_train, x_train, epochs=epochs, batch_size=batch_size,
                   verbose=1, validation_data=(x_test, x_test))
 
         model.save_weights(h5file)
 
     return model
+
 
 
 def hackAutoEncode():
@@ -334,17 +389,19 @@ def hackAutoEncode():
     model_output_layer = model.layers[-1].output
     #生成的图像与图案0之间的差为损失函数
     #cost_function = binary_crossentropy(y_pred,object_type_to_fake)
-    #cost_function = K.mean(K.binary_crossentropy(model_output_layer,object_type_to_fake))
-    cost_function=K.mean(K.square(model_output_layer-object_type_to_fake))
+    cost_function = K.mean(K.binary_crossentropy(model_output_layer,object_type_to_fake))
+    #cost_function=K.mean(K.square(model_output_layer-object_type_to_fake))
     gradient_function = K.gradients(cost_function, model_input_layer)[0]
     grab_cost_and_gradients_from_model = K.function([model_input_layer, K.learning_phase()],
                                                     [cost_function, gradient_function])
     cost = 0.0
 
     e = 0.007
+    #e = 0.01
 
     progress_bar = Progbar(target=100)
     for index in range(100):
+        #print index
         progress_bar.update(index)
         mnist_image_raw = generator_images[index]
         mnist_image_hacked = np.copy(mnist_image_raw)
@@ -361,10 +418,10 @@ def hackAutoEncode():
         i=0
         cost=100
         #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
-        while cost > 0.80 and i < 800:
+        while cost > -12.0 and i < 500:
             #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
             cost, gradients = grab_cost_and_gradients_from_model([mnist_image_hacked, 0])
-            print cost
+            #print cost
 
             # fast gradient sign method
             # EXPLAINING AND HARNESSING ADVERSARIAL EXAMPLES
@@ -385,20 +442,49 @@ def hackAutoEncode():
         #mnist_image_hacked=mnist_image_hacked.reshape(28,28,1)
         generator_images[index]=mnist_image_hacked
 
+    autoEncode_images = np.copy(generator_images)
     generator_images=generator_images.reshape(100,28,28,1)
+
+
+
     #保存图片
     image=get_images(generator_images)
     image = (image/2.0+0.5)*255.0
     Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked.png")
 
+    #image=255.0-image
+
+    #Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-w.png")
+
+
+    #灰度图像里面黑是0 白是255 可以把中间状态的处理下
+    #image[image>127]=255
+    #Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-w-good.png")
+
+
+    for index in range(100):
+        mnist_image_raw = autoEncode_images[index]
+        mnist_image_hacked = np.copy(mnist_image_raw)
+        mnist_image_hacked=mnist_image_hacked.reshape(28*28)
+        mnist_image_hacked = np.expand_dims(mnist_image_hacked, axis=0)
+        preds = model.predict(mnist_image_hacked)
+
+        autoEncode_images[index]=preds
+
+    autoEncode_images = autoEncode_images.reshape(100, 28, 28, 1)
+    image = get_images(autoEncode_images)
+    image = (image / 2.0 + 0.5) * 255.0
+    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-b.png")
+
     image=255.0-image
 
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-w.png")
+    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-w.png")
 
 
     #灰度图像里面黑是0 白是255 可以把中间状态的处理下
     image[image>127]=255
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-w-good.png")
+    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-w-good.png")
+
 
 if __name__ == "__main__":
     #trainCNN()
