@@ -15,7 +15,7 @@ import argparse
 import math
 import scipy.io
 from keras.utils.generic_utils import Progbar
-from keras.utils import plot_model
+#from keras.utils import plot_model
 
 
 def generator_model():
@@ -33,7 +33,7 @@ def generator_model():
     model.add(Conv2D(3, (5, 5), padding='same'))
     model.add(Activation('tanh'))
 
-    plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-generator_model.png')
+    #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-generator_model.png')
     return model
 
 
@@ -55,7 +55,7 @@ def discriminator_model():
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
 
-    plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-discriminator_model.png')
+    #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-discriminator_model.png')
     return model
 
 
@@ -65,7 +65,7 @@ def generator_containing_discriminator(g, d):
     d.trainable = False
     model.add(d)
 
-    plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-gan_model.png')
+    #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-gan_model.png')
     return model
 
 
@@ -73,15 +73,25 @@ def combine_images(generated_images):
     num = generated_images.shape[0]
     width = int(math.sqrt(num))
     height = int(math.ceil(float(num)/width))
-    shape = generated_images.shape[1:3]
-    image = np.zeros((height*shape[0], width*shape[1]),
+    shape = generated_images.shape[1:4]
+    image = np.zeros((height*shape[0], width*shape[1],shape[2]),
                      dtype=generated_images.dtype)
     for index, img in enumerate(generated_images):
         i = int(index/width)
         j = index % width
         image[i*shape[0]:(i+1)*shape[0], j*shape[1]:(j+1)*shape[1]] = \
-            img[:, :, 0]
+            img[:, :, :]
     return image
+
+def print_100(X_train):
+    generated_images=X_train[:100]
+
+    print generated_images.shape
+    image = combine_images(generated_images)
+    image = image * 127.5 + 127.5
+    # 调试阶段不生成图片
+    Image.fromarray(image.astype(np.uint8)).save("keras-dcgan-svhn/raw.png")
+
 
 
 def train(BATCH_SIZE=100):
@@ -92,10 +102,24 @@ def train(BATCH_SIZE=100):
     print(X_train.shape, Y_train.shape)
     Y_train[Y_train == 10] = 0
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
-    X_train = X_train[:, :, :, None]
-    X_train = X_train.reshape(26032,32,32,3)
+    #X_train = X_train[:, :, :, None]
+    #(32, 32, 3,26032)
+    X_train = np.swapaxes(X_train, 0, 3)
+    #X_train = np.swapaxes(X_train, 1, 2)
+    # 26032, 32, 3,32)
+    X_train = np.swapaxes(X_train, 2, 3)
+    # 26032, 32, 32,3)
+    #调整前后关系  否则图像是横竖是反的
+    X_train = np.swapaxes(X_train, 1, 2)
+
+    #X_train = X_train.reshape(26032,32,32,3)
 
     print(X_train.shape, Y_train.shape)
+
+
+    #打印前100个图案
+    print_100(X_train)
+
 
     d = discriminator_model()
     g = generator_model()
@@ -116,7 +140,7 @@ def train(BATCH_SIZE=100):
             noise = np.random.uniform(-1, 1, size=(BATCH_SIZE, 100))
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             generated_images = g.predict(noise, verbose=0)
-            if index % 20 == 0:
+            if index % 100 == 0:
                 image = combine_images(generated_images)
                 image = image*127.5+127.5
                 #调试阶段不生成图片
@@ -131,7 +155,7 @@ def train(BATCH_SIZE=100):
             g_loss = d_on_g.train_on_batch(noise, [1] * BATCH_SIZE)
             d.trainable = True
             #print("batch %d g_loss : %f" % (index, g_loss))
-            progress_bar.update(index,values=[("d_loss",d_loss),("g_loss",g_loss)])
+            progress_bar.update(index,values=[("d_loss",d_loss),("g_loss",g_loss),("epoch",epoch+1)])
 
 
 if __name__ == "__main__":
