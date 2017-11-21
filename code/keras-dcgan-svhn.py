@@ -20,7 +20,7 @@ from keras.utils.generic_utils import Progbar
 
 def generator_model():
     model = Sequential()
-    model.add(Dense(input_dim=100, units=1024))
+    model.add(Dense(input_dim=200, units=1024))
     model.add(Activation('tanh'))
     model.add(Dense(128*8*8))
     model.add(BatchNormalization())
@@ -96,8 +96,8 @@ def print_100(X_train):
 
 def train(BATCH_SIZE=100):
     #load svhn 数据量太大了 使用其测试集来训练
-    X_train = scipy.io.loadmat('test_32x32.mat', variable_names='X').get('X')
-    Y_train = scipy.io.loadmat('test_32x32.mat', variable_names='y').get('y')
+    X_train = scipy.io.loadmat('svhn_32x32.mat', variable_names='X').get('X')
+    Y_train = scipy.io.loadmat('svhn_32x32.mat', variable_names='y').get('y')
 
     print(X_train.shape, Y_train.shape)
     Y_train[Y_train == 10] = 0
@@ -137,7 +137,7 @@ def train(BATCH_SIZE=100):
 
         progress_bar = Progbar(target=BATCH_COUNT)
         for index in range(int(X_train.shape[0]/BATCH_SIZE)):
-            noise = np.random.uniform(-1, 1, size=(BATCH_SIZE, 100))
+            noise = np.random.uniform(-1, 1, size=(BATCH_SIZE, 200))
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             generated_images = g.predict(noise, verbose=0)
             if index % 100 == 0:
@@ -150,7 +150,7 @@ def train(BATCH_SIZE=100):
             y = [1] * BATCH_SIZE + [0] * BATCH_SIZE
             d_loss = d.train_on_batch(X, y)
             #print("batch %d d_loss : %f" % (index, d_loss))
-            noise = np.random.uniform(-1, 1, (BATCH_SIZE, 100))
+            noise = np.random.uniform(-1, 1, (BATCH_SIZE, 200))
             d.trainable = False
             g_loss = d_on_g.train_on_batch(noise, [1] * BATCH_SIZE)
             d.trainable = True
