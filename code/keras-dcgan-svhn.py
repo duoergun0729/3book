@@ -15,10 +15,10 @@ import argparse
 import math
 import scipy.io
 from keras.utils.generic_utils import Progbar
-#from keras.utils import plot_model
+from keras.utils import plot_model
 
 
-def generator_model():
+def generator_model_old():
     model = Sequential()
     model.add(Dense(input_dim=200, units=1024))
     model.add(Activation('tanh'))
@@ -36,6 +36,54 @@ def generator_model():
     #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-generator_model.png')
     return model
 
+def generator_model():
+    model = Sequential()
+    model.add(Dense(input_dim=100, units=1024))
+
+    model.add(Activation('tanh'))
+    model.add(Dense(1024*4*4))
+    model.add(BatchNormalization())
+    model.add(Activation('tanh'))
+    model.add(Reshape((4, 4, 1024), input_shape=(1024*4*4,)))
+    model.add(UpSampling2D(size=(2, 2)))
+    model.add(Conv2D(512, (2, 2),padding='same'))
+
+    model.add(UpSampling2D(size=(2, 2)))
+    model.add(Conv2D(256, (5, 5),padding='same'))
+
+    model.add(UpSampling2D(size=(2, 2)))
+    model.add(Conv2D(128, (5, 5),padding='same'))
+
+    model.add(Conv2D(3, (5, 5), padding='same'))
+    model.add(Activation('tanh'))
+
+    #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-generator_model.png')
+
+    model.summary()
+
+    return model
+
+
+def discriminator_model_old():
+    model = Sequential()
+    model.add(
+            Conv2D(64, (5, 5),
+            padding='same',
+            input_shape=(32, 32, 3))
+            )
+    model.add(Activation('tanh'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(128, (5, 5)))
+    model.add(Activation('tanh'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Flatten())
+    model.add(Dense(1024))
+    model.add(Activation('tanh'))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+
+    #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-discriminator_model.png')
+    return model
 
 def discriminator_model():
     model = Sequential()
@@ -57,7 +105,6 @@ def discriminator_model():
 
     #plot_model(model, show_shapes=True, to_file='keras-dcgan-svhn/keras-dcgan-discriminator_model.png')
     return model
-
 
 def generator_containing_discriminator(g, d):
     model = Sequential()
@@ -137,7 +184,7 @@ def train(BATCH_SIZE=100):
 
         progress_bar = Progbar(target=BATCH_COUNT)
         for index in range(int(X_train.shape[0]/BATCH_SIZE)):
-            noise = np.random.uniform(-1, 1, size=(BATCH_SIZE, 200))
+            noise = np.random.uniform(-1, 1, size=(BATCH_SIZE, 100))
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             generated_images = g.predict(noise, verbose=0)
             if index % 100 == 0:
@@ -150,7 +197,7 @@ def train(BATCH_SIZE=100):
             y = [1] * BATCH_SIZE + [0] * BATCH_SIZE
             d_loss = d.train_on_batch(X, y)
             #print("batch %d d_loss : %f" % (index, d_loss))
-            noise = np.random.uniform(-1, 1, (BATCH_SIZE, 200))
+            noise = np.random.uniform(-1, 1, (BATCH_SIZE, 100))
             d.trainable = False
             g_loss = d_on_g.train_on_batch(noise, [1] * BATCH_SIZE)
             d.trainable = True
