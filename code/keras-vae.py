@@ -270,7 +270,7 @@ Epoch 20/20
 60000/60000 [==============================] - 8s - loss: 153.7320 - val_loss: 156.0068
         """
         #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
-        while cost > 156/784.0 and i < 500:
+        while cost > 250/784.0 and i < 800:
             #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
             cost, gradients = grab_cost_and_gradients_from_model([mnist_image_hacked, 0])
             #print cost
@@ -290,7 +290,8 @@ Epoch 20/20
             #progress_bar.update(index,values=[('cost',cost),('batch',i)],force=True)
             i += 1
 
-
+        if i >= 500:
+            print i
 
         #覆盖原有图片
         #mnist_image_hacked=mnist_image_hacked.reshape(28,28,1)
