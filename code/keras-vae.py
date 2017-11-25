@@ -219,7 +219,6 @@ def hackAutoEncode():
     raw_images=getDataFromMnist()
     generator_images=np.copy(raw_images)
 
-
     generator_images=generator_images.reshape(100,784)
 
     model = trainAutoEncode()
@@ -242,7 +241,7 @@ def hackAutoEncode():
     cost = 0.0
 
     e = 0.007
-    #e = 0.01
+
 
     progress_bar = Progbar(target=100)
     for index in range(100):
@@ -263,7 +262,7 @@ def hackAutoEncode():
         i=0
         cost=100
         #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
-        while cost > -12.0 and i < 500:
+        while cost > 156/784.0 and i < 500:
             #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
             cost, gradients = grab_cost_and_gradients_from_model([mnist_image_hacked, 0])
             #print cost
@@ -275,7 +274,9 @@ def hackAutoEncode():
             mnist_image_hacked -= n * e
 
             mnist_image_hacked = np.clip(mnist_image_hacked, max_change_below, max_change_above)
-            mnist_image_hacked = np.clip(mnist_image_hacked, -1.0, 1.0)
+            #mnist_image_hacked = np.clip(mnist_image_hacked, -1.0, 1.0)
+            #像素取值在0到1之间
+            mnist_image_hacked = np.clip(mnist_image_hacked, 0.0, 1.0)
 
             #print("batch:{} Cost: {:.8}%".format(i, cost * 100))
             #progress_bar.update(index,values=[('cost',cost),('batch',i)],force=True)
@@ -294,12 +295,13 @@ def hackAutoEncode():
 
     #保存图片
     image=get_images(generator_images)
-    image = (image/2.0+0.5)*255.0
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked.png")
+    #image = (image/2.0+0.5)*255.0
+    image = image * 255.0
+    Image.fromarray(image.astype(np.uint8)).save("VAE/AdversarialExamples-b.png")
 
-    #image=255.0-image
+    image=255.0-image
 
-    #Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-w.png")
+    Image.fromarray(image.astype(np.uint8)).save("VAE/AdversarialExamples-w.png")
 
 
     #灰度图像里面黑是0 白是255 可以把中间状态的处理下
@@ -318,24 +320,21 @@ def hackAutoEncode():
 
     autoEncode_images = autoEncode_images.reshape(100, 28, 28, 1)
     image = get_images(autoEncode_images)
-    image = (image / 2.0 + 0.5) * 255.0
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-b.png")
+    #image = (image / 2.0 + 0.5) * 255.0
+    image = image * 255.0
+    Image.fromarray(image.astype(np.uint8)).save("VAE/ReconstructionAdversarialExamples-b.png")
 
     image=255.0-image
 
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-w.png")
+    Image.fromarray(image.astype(np.uint8)).save("VAE/ReconstructionAdversarialExamples-w.png")
 
-
-    #灰度图像里面黑是0 白是255 可以把中间状态的处理下
-    image[image>127]=255
-    Image.fromarray(image.astype(np.uint8)).save("hackAutoEncode/100mnist-hacked-autoEncode-w-good.png")
 
 
 if __name__ == "__main__":
     #trainCNN()
     #hackAll()
-    #hackAutoEncode()
-    trainAutoEncode()
+    hackAutoEncode()
+    #trainAutoEncode()
 
 
 
