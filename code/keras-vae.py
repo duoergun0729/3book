@@ -261,6 +261,14 @@ def hackAutoEncode():
 
         i=0
         cost=100
+        """
+        Epoch 18/20
+60000/60000 [==============================] - 8s - loss: 153.7977 - val_loss: 153.8969
+Epoch 19/20
+60000/60000 [==============================] - 8s - loss: 153.6312 - val_loss: 153.5625
+Epoch 20/20
+60000/60000 [==============================] - 8s - loss: 153.7320 - val_loss: 156.0068
+        """
         #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
         while cost > 156/784.0 and i < 500:
             #print "\nmnist_image_hacked.shape:{}".format(mnist_image_hacked.shape)
