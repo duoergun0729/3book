@@ -145,7 +145,7 @@ def trainAutoEncode():
         z_mean, z_std = args
         epsilon = K.random_normal(shape=(K.shape(z_mean)[0], latent_dim), mean=0.,
                                   stddev=epsilon_std)
-        return z_mean + K.exp(z_std) * epsilon
+        return z_mean + K.exp(z_std/2) * epsilon
 
     # note that "output_shape" isn't necessary with the TensorFlow backend
     z = Lambda(sampling, output_shape=(latent_dim,))([z_mean, z_std])
