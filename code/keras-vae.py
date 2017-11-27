@@ -24,7 +24,7 @@ from keras.utils.generic_utils import Progbar
 import os
 from keras.layers import Dense, Input
 from keras.models import Model
-#from keras.utils import plot_model
+from keras.utils import plot_model
 
 
 batch_size = 200
@@ -209,7 +209,7 @@ def trainAutoEncode():
     image = 255.0 - image
     Image.fromarray(image.astype(np.uint8)).save("VAE/Original-Reconstruction-w.png")
 
-    #plot_model(model, show_shapes=True, to_file='VAE/vae_model.png')
+    plot_model(model, show_shapes=True, to_file='VAE/vae_model.png')
 
     return model
 
