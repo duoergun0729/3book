@@ -12,6 +12,7 @@ code/*.log
 code/*.png
 code/*.h5f
 code/*.txt
+code/aisec/data/
 code/gym-malware/gym_malware/envs/utils/samples-old/
 code/gym-malware/gym_malware/envs/utils/samples
 code/gym-malware/evaded/*
