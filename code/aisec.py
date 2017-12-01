@@ -2,7 +2,7 @@
 import os,sys,fnmatch
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.layers import Dense, Activation,Dropout
 from keras.layers import LSTM
 from keras.optimizers import RMSprop
 from keras.utils.data_utils import get_file
@@ -15,11 +15,13 @@ import re
 #scp aisec.py aisec/data/tomcat.apache.org.tar.gz root@101.236.50.226:/data
 html_dir="aisec/data/tomcat.apache.org/"
 #html_dir="aisec/data/demo/"
-model_file="aisec.h5"
-epochs=20
-max_files=6
+model_file="model-aisec.h5"
+epochs=10
+max_files=1000
 
-test_set=["<li></","<input type='' value=''","<em class=''>"]
+test_set=["lass=''><h2 id=''></h2><div clas",
+          "lass=''><h id=''></h><div clas"
+          ]
 
 
 def search_file(pattern="*.txt", root=os.curdir):
@@ -71,13 +73,28 @@ def generate(text, maxlen = 40,step = 1):
     # build the model: a single LSTM
     print('Build model...')
     model = Sequential()
-    model.add(LSTM(128, input_shape=(maxlen, len(chars))))
+    # 避免过拟合
+    model.add(LSTM(128, dropout=0.1,return_sequences=True,input_shape=(maxlen, len(chars))))
+
+    model.add(LSTM(128, dropout=0.1, return_sequences=False))
+
     model.add(Dense(len(chars)))
     model.add(Activation('softmax'))
 
     optimizer = RMSprop(lr=0.01)
     model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 
+    model.summary()
+
+
+    """
+    Temperature. We can also play with the temperature of the Softmax during sampling. Decreasing the temperature from 1
+    to some lower number (e.g. 0.5) makes the RNN more confident, but also more conservative in its samples. Conversely,
+    higher temperatures will give more diversity but at cost of more mistakes (e.g. spelling mistakes, etc). In particular,
+    setting temperature very near zero will give the most likely thing that Paul Graham might say:
+
+    """
+    #相当于实现softmax
     def sample(preds, temperature=1.0):
         # helper function to sample an index from a probability array
         preds = np.asarray(preds).astype('float64')
@@ -89,6 +106,7 @@ def generate(text, maxlen = 40,step = 1):
 
     if os.path.exists(model_file):
         model.load_weights(model_file)
+        print()
     else:
         tbCallBack = keras.callbacks.TensorBoard(log_dir='/tmp/TensorBoard', histogram_freq=0, write_graph=True,
                                                  write_images=True)
@@ -105,22 +123,27 @@ def generate(text, maxlen = 40,step = 1):
         print('Iteration', iteration)
 
 
-        start_index = random.randint(0, len(text) - maxlen - 1)
-
-        for diversity in [0.2, 1.0, 1.2]:
+        for diversity in [0.1, 1,1.8]:
             print()
             print('----- diversity:', diversity)
 
-            for sentence in test_set:
-                generated = ''
-                #sentence = text[start_index: start_index + maxlen]
+            for _ in range(6):
+            #for sentence in test_set:
+                #generated = ''
+                start_index = random.randint(0, len(text) - maxlen - 1)
+                sentence = text[start_index: start_index + maxlen]
                 #sentence="<textarea>XXX"
 
+                generated = ""
                 generated += sentence
+                #generated=""
+                #便于区分种子很生成的内容
+                generated += "||"
+                print('\n')
                 print('----- Generating with seed: "' + sentence + '"')
                 sys.stdout.write(generated)
 
-                for i in range(64):
+                for i in range(16):
                     x_pred = np.zeros((1, maxlen, len(chars)))
                     for t, char in enumerate(sentence):
                         x_pred[0, t, char_indices[char]] = 1.
@@ -197,7 +220,7 @@ if __name__ == '__main__':
 
     #print clean_html
 
-    generate(clean_html, maxlen=64, step=3)
+    generate(clean_html, maxlen=32, step=3)
     """
         text=""
         for i in html_files:
