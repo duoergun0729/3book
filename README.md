@@ -1,5 +1,7 @@
 
 # 《Web安全之强化学习与GAN》
+
+![logo](photo/1522396023615.jpg)
 # 京东链接
 [https://item.jd.com/12335258.html](https://item.jd.com/12335258.html)
 # 主要内容
